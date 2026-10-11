@@ -1,0 +1,1589 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>材料加工过程数值模拟 · 传热基础课件</title>
+
+<script>
+MathJax = {
+  tex: {
+    inlineMath: [['$','$'], ['\\(','\\)']],
+    displayMath: [['$$','$$'], ['\\[','\\]']]
+  },
+  options: { skipHtmlTags: ['script','noscript','style','textarea','pre','code'] },
+  svg: { fontCache: 'global' }
+};
+</script>
+<script async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+
+<style>
+:root{
+  --primary:#0f4c75;
+  --primary-light:#3282b8;
+  --accent:#e67e22;
+  --hot:#e74c3c;
+  --cool:#2980b9;
+  --bg:#eef2f7;
+  --card:#ffffff;
+  --text:#1f2d3d;
+  --muted:#5a6b7c;
+  --border:#d8e0e8;
+}
+*{box-sizing:border-box;}
+html{scroll-behavior:smooth;}
+body{
+  margin:0;
+  font-family:"Segoe UI","PingFang SC","Hiragino Sans GB","Microsoft YaHei",system-ui,sans-serif;
+  background:var(--bg);
+  color:var(--text);
+  line-height:1.8;
+  font-size:16px;
+}
+
+/* ---------- 顶部 Hero ---------- */
+.hero{
+  background:linear-gradient(135deg,#0f4c75 0%,#1b6ca8 45%,#3282b8 100%);
+  color:#fff;
+  padding:56px 24px 48px;
+  position:relative;
+  overflow:hidden;
+}
+.hero::after{
+  content:"";
+  position:absolute;right:-80px;top:-80px;
+  width:340px;height:340px;border-radius:50%;
+  background:radial-gradient(circle,rgba(255,255,255,.16),transparent 70%);
+}
+.hero::before{
+  content:"";
+  position:absolute;left:-60px;bottom:-120px;
+  width:280px;height:280px;border-radius:50%;
+  background:radial-gradient(circle,rgba(230,126,34,.25),transparent 70%);
+}
+.hero-inner{max-width:1400px;margin:0 auto;position:relative;z-index:1;}
+.course-tag{
+  display:inline-block;
+  background:rgba(255,255,255,.16);
+  border:1px solid rgba(255,255,255,.3);
+  padding:5px 14px;border-radius:20px;
+  font-size:13px;letter-spacing:.5px;margin-bottom:16px;
+}
+.hero h1{
+  margin:0 0 12px;
+  font-size:clamp(26px,3.6vw,42px);
+  font-weight:700;letter-spacing:1px;
+}
+.hero .subtitle{
+  margin:0 0 18px;font-size:clamp(14px,1.6vw,18px);
+  opacity:.92;font-weight:300;
+}
+.hero .meta{font-size:13.5px;opacity:.78;}
+
+/* ---------- 布局 ---------- */
+.layout{
+  max-width:1400px;margin:0 auto;
+  padding:36px 24px 100px;
+  display:grid;
+  grid-template-columns:252px minmax(0,1fr);
+  gap:32px;
+  align-items:start;
+}
+
+/* ---------- 侧边导航 ---------- */
+.sidebar{
+  position:sticky;top:24px;
+  background:var(--card);
+  border-radius:14px;
+  padding:18px 14px;
+  box-shadow:0 4px 18px rgba(15,76,117,.08);
+  border:1px solid var(--border);
+  max-height:calc(100vh - 48px);
+  overflow-y:auto;
+}
+.nav-title{
+  font-size:12px;letter-spacing:2px;color:var(--muted);
+  text-transform:uppercase;padding:0 10px 10px;font-weight:600;
+}
+.sidebar a{
+  display:block;
+  padding:8px 12px;
+  color:#3c4a5a;
+  text-decoration:none;
+  font-size:14px;
+  border-radius:8px;
+  border-left:3px solid transparent;
+  transition:.18s;
+  margin-bottom:2px;
+}
+.sidebar a:hover{background:#eef5fb;color:var(--primary);}
+.sidebar a.active{
+  background:linear-gradient(90deg,#e8f2fa,#f6fafd);
+  border-left-color:var(--primary-light);
+  color:var(--primary);
+  font-weight:600;
+}
+
+/* ---------- 内容卡片 ---------- */
+.content{min-width:0;}
+section.card{
+  background:var(--card);
+  border-radius:16px;
+  padding:34px 38px;
+  margin-bottom:30px;
+  box-shadow:0 4px 20px rgba(15,76,117,.07);
+  border:1px solid var(--border);
+  scroll-margin-top:20px;
+}
+h2{
+  font-size:clamp(20px,2.3vw,27px);
+  color:var(--primary);
+  margin:0 0 6px;
+  padding-bottom:14px;
+  border-bottom:3px solid #e6eef6;
+  position:relative;
+}
+h2::after{
+  content:"";position:absolute;left:0;bottom:-3px;
+  width:78px;height:3px;background:var(--accent);border-radius:2px;
+}
+h3{
+  font-size:18.5px;color:#14507a;margin:34px 0 12px;
+  padding-left:12px;border-left:4px solid var(--primary-light);
+}
+h4{font-size:16px;color:#1b5a85;margin:22px 0 8px;}
+p{margin:12px 0;}
+ul,ol{padding-left:24px;margin:12px 0;}
+li{margin:6px 0;}
+
+/* ---------- 公式块 ---------- */
+.formula{
+  background:linear-gradient(135deg,#f8fbff,#eef5fb);
+  border-left:4px solid var(--primary-light);
+  border-radius:0 8px 8px 0;
+  padding:8px 20px;
+  margin:18px 0;
+  overflow-x:auto;
+  box-shadow:inset 0 0 0 1px rgba(50,130,184,.08);
+}
+.formula.key{
+  border-left-color:var(--accent);
+  background:linear-gradient(135deg,#fffaf4,#fdf3e7);
+  box-shadow:inset 0 0 0 1px rgba(230,126,34,.12);
+}
+
+/* ---------- 表格 ---------- */
+table{
+  width:100%;border-collapse:collapse;margin:20px 0;font-size:14.5px;
+  border-radius:8px;overflow:hidden;
+  box-shadow:0 1px 6px rgba(15,76,117,.08);
+}
+thead{background:linear-gradient(135deg,#0f4c75,#3282b8);color:#fff;}
+th,td{padding:10px 14px;text-align:left;border-bottom:1px solid #e6edf4;}
+tbody tr:nth-child(even){background:#f7fafd;}
+tbody tr:hover{background:#eef5fb;}
+th{font-weight:600;font-size:14px;letter-spacing:.3px;}
+
+/* ---------- 图 ---------- */
+figure{
+  margin:26px 0;text-align:center;
+  background:#fbfdff;
+  border:1px solid var(--border);
+  border-radius:12px;
+  padding:18px 16px 12px;
+}
+figure svg{max-width:100%;height:auto;display:block;margin:0 auto;}
+figcaption{
+  font-size:13.5px;color:var(--muted);margin-top:12px;
+  padding-top:10px;border-top:1px dashed #dde6ee;
+}
+.fig-grid{
+  display:grid;grid-template-columns:repeat(auto-fit,minmax(230px,1fr));
+  gap:18px;margin:26px 0;
+}
+.fig-grid figure{margin:0;padding:14px 10px 10px;}
+
+/* ---------- 提示框 ---------- */
+.note{
+  border-radius:10px;padding:14px 18px;margin:20px 0;font-size:14.8px;
+  display:flex;gap:12px;align-items:flex-start;
+}
+.note .ico{font-size:18px;line-height:1.4;flex-shrink:0;}
+.note.tip{background:#eef8f2;border-left:4px solid #27ae60;}
+.note.warn{background:#fdf3e7;border-left:4px solid var(--accent);}
+.note.info{background:#eaf3fb;border-left:4px solid var(--primary-light);}
+
+/* ---------- 流程图 ---------- */
+.flow{display:flex;flex-direction:column;align-items:center;margin:26px 0;}
+.flow-step{
+  background:#fff;border:2px solid var(--primary-light);
+  border-radius:9px;padding:10px 24px;font-size:14.5px;
+  box-shadow:0 2px 8px rgba(15,76,117,.08);
+  text-align:center;min-width:250px;color:#14507a;font-weight:500;
+}
+.flow-step.hl{border-color:var(--accent);background:#fffaf4;color:#b35e0f;}
+.flow-step.io{border-color:#27ae60;background:#f1faf5;color:#1e7c48;}
+.flow-arrow{
+  width:2px;height:22px;background:var(--primary-light);position:relative;
+}
+.flow-arrow::after{
+  content:"";position:absolute;bottom:-1px;left:-4px;
+  border-left:5px solid transparent;border-right:5px solid transparent;
+  border-top:8px solid var(--primary-light);
+}
+
+/* ---------- FAQ 手风琴 ---------- */
+details{
+  background:#f8fbfe;border:1px solid var(--border);border-radius:10px;
+  padding:12px 18px;margin:12px 0;transition:.2s;
+}
+details[open]{background:#fff;box-shadow:0 3px 14px rgba(15,76,117,.09);border-color:#bcd9ec;}
+summary{
+  cursor:pointer;font-weight:600;color:var(--primary);
+  list-style:none;outline:none;font-size:15.5px;
+  display:flex;align-items:center;gap:8px;
+}
+summary::-webkit-details-marker{display:none;}
+summary::before{
+  content:"Q";display:inline-flex;align-items:center;justify-content:center;
+  width:22px;height:22px;border-radius:50%;flex-shrink:0;
+  background:var(--primary-light);color:#fff;font-size:12px;font-weight:700;
+}
+details p{margin:10px 0 2px;font-size:14.8px;color:#33465a;}
+
+/* ---------- 页脚 ---------- */
+footer{
+  text-align:center;padding:34px 24px 60px;
+  color:var(--muted);font-size:13.5px;
+}
+
+/* ---------- 返回顶部 ---------- */
+#toTop{
+  position:fixed;right:26px;bottom:26px;
+  width:46px;height:46px;border-radius:50%;
+  background:linear-gradient(135deg,#0f4c75,#3282b8);
+  color:#fff;border:none;cursor:pointer;font-size:19px;
+  box-shadow:0 6px 18px rgba(15,76,117,.32);
+  opacity:0;pointer-events:none;transition:.25s;z-index:99;
+}
+#toTop.show{opacity:1;pointer-events:auto;}
+#toTop:hover{transform:translateY(-3px);}
+
+/* ---------- 响应式 ---------- */
+@media (max-width:900px){
+  .layout{grid-template-columns:1fr;gap:18px;padding:20px 16px 80px;}
+  .sidebar{position:static;max-height:none;overflow:visible;}
+  section.card{padding:24px 20px;}
+  .hero{padding:40px 18px 34px;}
+}
+</style>
+</head>
+<body>
+
+<!-- ================= 顶部 ================= -->
+<header class="hero">
+  <div class="hero-inner">
+    <div class="course-tag">材料加工过程数值模拟 · 研究生课程</div>
+    <h1>传热基础与有限元求解</h1>
+    <p class="subtitle">从传热学基本概念到热应力 / 残余应力的数值模拟</p>
+    <div class="meta">面向全校研究生 · 材料 · 机械 · 冶金等专业 &nbsp;|&nbsp; 建议学时：6～8 学时</div>
+  </div>
+</header>
+
+<div class="layout">
+
+  <!-- ================= 侧边导航 ================= -->
+  <nav class="sidebar">
+    <div class="nav-title">目录导航</div>
+    <a href="#intro" class="active">绪论</a>
+    <a href="#ch1">第一章 传热学基本概念及公式</a>
+    <a href="#ch2">第二章 稳态传热有限元推导</a>
+    <a href="#ch3">第三章 瞬态传热有限元推导</a>
+    <a href="#ch4">第四章 热应力与残余应力</a>
+    <a href="#summary">本章小结</a>
+    <a href="#faq">常见问题解答</a>
+    <a href="#refs">推荐阅读</a>
+  </nav>
+
+  <!-- ================= 正文 ================= -->
+  <main class="content">
+
+  <!-- ========== 绪论 ========== -->
+  <section class="card" id="intro">
+    <h2>绪论</h2>
+
+    <h3>一、为什么材料加工过程需要数值模拟？</h3>
+    <p>
+      材料加工过程——无论是铸造、焊接、锻造、热处理还是增材制造——本质上都是
+      <strong>在温度场驱动下，材料发生形状、组织与性能演变的过程</strong>。
+      传热贯穿于几乎所有材料加工过程的始终：焊接热源的移动引起焊缝附近急剧的升温和冷却；
+      铸件凝固过程中固-液界面的推进由温度梯度控制；增材制造中激光扫描带来的反复热循环
+      决定了成形件的微观组织与残余应力分布。
+    </p>
+    <p>
+      解析方法（如分离变量法、格林函数法）仅能处理规则几何形状和简单边界条件下的传热问题。
+      而实际材料加工过程中，几何形状复杂、材料热物性随温度变化、边界条件涉及相变潜热与移动热源，
+      必须借助数值方法进行求解。<strong>有限元法（FEM）</strong>是当前材料加工传热分析中
+      应用最广泛的数值方法之一。
+    </p>
+
+    <h3>二、本课程的知识框架</h3>
+    <p>本章内容按「<strong>物理基础 → 数学建模 → 数值求解 → 工程应用</strong>」的逻辑展开：</p>
+
+    <figure>
+      <svg viewBox="0 0 760 210" role="img" aria-label="知识框架图">
+        <defs>
+          <marker id="fArrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto">
+            <path d="M0,0 L10,5 L0,10 z" fill="#3282b8"/>
+          </marker>
+          <linearGradient id="fBox1" x1="0" y1="0" x2="0" y2="1">
+            <stop offset="0%" stop-color="#e8f2fa"/><stop offset="100%" stop-color="#d3e6f5"/>
+          </linearGradient>
+          <linearGradient id="fBox2" x1="0" y1="0" x2="0" y2="1">
+            <stop offset="0%" stop-color="#fff3e4"/><stop offset="100%" stop-color="#fde3c6"/>
+          </linearGradient>
+        </defs>
+
+        <rect x="20" y="60" width="150" height="76" rx="12" fill="url(#fBox1)" stroke="#3282b8" stroke-width="2"/>
+        <text x="95" y="92" text-anchor="middle" font-size="15" font-weight="600" fill="#0f4c75">物理基础</text>
+        <text x="95" y="115" text-anchor="middle" font-size="12.5" fill="#5a6b7c">三种传热方式</text>
+
+        <line x1="175" y1="98" x2="205" y2="98" stroke="#3282b8" stroke-width="2" marker-end="url(#fArrow)"/>
+
+        <rect x="210" y="60" width="150" height="76" rx="12" fill="url(#fBox1)" stroke="#3282b8" stroke-width="2"/>
+        <text x="285" y="92" text-anchor="middle" font-size="15" font-weight="600" fill="#0f4c75">数学建模</text>
+        <text x="285" y="115" text-anchor="middle" font-size="12.5" fill="#5a6b7c">控制方程 + 边界条件</text>
+
+        <line x1="365" y1="98" x2="395" y2="98" stroke="#3282b8" stroke-width="2" marker-end="url(#fArrow)"/>
+
+        <rect x="400" y="60" width="150" height="76" rx="12" fill="url(#fBox2)" stroke="#e67e22" stroke-width="2"/>
+        <text x="475" y="92" text-anchor="middle" font-size="15" font-weight="600" fill="#b35e0f">数值求解</text>
+        <text x="475" y="115" text-anchor="middle" font-size="12.5" fill="#8a6540">有限元离散</text>
+
+        <line x1="555" y1="98" x2="585" y2="98" stroke="#3282b8" stroke-width="2" marker-end="url(#fArrow)"/>
+
+        <rect x="590" y="60" width="150" height="76" rx="12" fill="url(#fBox2)" stroke="#e67e22" stroke-width="2"/>
+        <text x="665" y="92" text-anchor="middle" font-size="15" font-weight="600" fill="#b35e0f">工程应用</text>
+        <text x="665" y="115" text-anchor="middle" font-size="12.5" fill="#8a6540">焊接 / 铸造 / 增材</text>
+
+        <!-- 章节标注 -->
+        <text x="95" y="168" text-anchor="middle" font-size="12.5" fill="#3282b8">第一章</text>
+        <text x="285" y="168" text-anchor="middle" font-size="12.5" fill="#3282b8">第一 ~ 二章</text>
+        <text x="475" y="168" text-anchor="middle" font-size="12.5" fill="#e67e22">第二章 / 第三章</text>
+        <text x="665" y="168" text-anchor="middle" font-size="12.5" fill="#e67e22">第四章</text>
+
+        <!-- 顶部分支 -->
+        <text x="380" y="34" text-anchor="middle" font-size="13" fill="#5a6b7c">稳态分析（第二章） &nbsp;·&nbsp; 瞬态分析（第三章）</text>
+      </svg>
+      <figcaption>图 0-1　本章知识框架与章节对应关系</figcaption>
+    </figure>
+
+    <ul>
+      <li><strong>第一章：传热学基本概念及公式</strong>——建立三种传热方式的基本方程与三类边界条件，
+        为后续有限元推导提供数学物理基础。</li>
+      <li><strong>第二章：稳态传热问题有限元公式推导</strong>——从加权残量法出发，
+        推导稳态热传导的有限元方程，掌握刚度矩阵与载荷向量的构造方法。</li>
+      <li><strong>第三章：瞬态传热问题有限元公式推导</strong>——引入时间离散，
+        推导瞬态热传导的有限元递推公式，理解不同时间积分方案的稳定性与精度。</li>
+      <li><strong>第四章：热应力和残余应力产生原因及有限元求解</strong>——从热弹性本构关系出发，
+        建立热应力有限元方程，讨论残余应力的形成机制与数值求解策略。</li>
+    </ul>
+
+    <div class="note tip">
+      <span class="ico">💡</span>
+      <div><strong>学习建议：</strong>每章均包含「关键公式推导」和「物理意义解读」两部分。
+        建议先理解物理图像的直观含义，再深入推导过程，最后结合材料加工实例
+        （如焊接、铸造）思考公式的工程意义。</div>
+    </div>
+  </section>
+
+
+  <!-- ========== 第一章 ========== -->
+  <section class="card" id="ch1">
+    <h2>第一章　传热学基本概念及公式</h2>
+
+    <h3>1.1　热量传递的三种基本方式</h3>
+    <p>热量传递的驱动力是<strong>温度差</strong>。自然界和工程中热量传递有三种基本方式：</p>
+
+    <div class="fig-grid">
+      <!-- 热传导 -->
+      <figure>
+        <svg viewBox="0 0 280 170" role="img" aria-label="热传导示意图">
+          <defs>
+            <linearGradient id="gCond" x1="0" y1="0" x2="1" y2="0">
+              <stop offset="0%" stop-color="#e74c3c"/>
+              <stop offset="45%" stop-color="#f5b041"/>
+              <stop offset="100%" stop-color="#5dade2"/>
+            </linearGradient>
+            <marker id="mW1" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="5" markerHeight="5" orient="auto">
+              <path d="M0,0 L10,5 L0,10 z" fill="#ffffff"/>
+            </marker>
+          </defs>
+          <text x="140" y="30" text-anchor="middle" font-size="13" fill="#5a6b7c">热流方向 →</text>
+          <rect x="28" y="62" width="224" height="46" rx="6" fill="url(#gCond)" stroke="#90a4ae"/>
+          <line x1="55" y1="85" x2="100" y2="85" stroke="#fff" stroke-width="3" marker-end="url(#mW1)"/>
+          <line x1="115" y1="85" x2="160" y2="85" stroke="#fff" stroke-width="3" marker-end="url(#mW1)"/>
+          <line x1="175" y1="85" x2="220" y2="85" stroke="#fff" stroke-width="3" marker-end="url(#mW1)"/>
+          <text x="28" y="140" font-size="13" fill="#e74c3c">T₁ 高温</text>
+          <text x="196" y="140" font-size="13" fill="#2980b9">T₂ 低温</text>
+          <text x="140" y="160" text-anchor="middle" font-size="12" fill="#90a4ae">无宏观位移</text>
+        </svg>
+        <figcaption><strong>热传导</strong><br>物体内部或接触物体间微观粒子的热运动</figcaption>
+      </figure>
+
+      <!-- 热对流 -->
+      <figure>
+        <svg viewBox="0 0 280 180" role="img" aria-label="热对流示意图">
+          <defs>
+            <marker id="mB2" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto">
+              <path d="M0,0 L10,5 L0,10 z" fill="#3282b8"/>
+            </marker>
+            <marker id="mR2" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto">
+              <path d="M0,0 L10,5 L0,10 z" fill="#e74c3c"/>
+            </marker>
+          </defs>
+          <text x="30" y="26" font-size="12.5" fill="#3282b8">流体 T_f</text>
+          <path d="M30 50 Q 90 34 140 50 T 250 50" fill="none" stroke="#3282b8" stroke-width="2" marker-end="url(#mB2)"/>
+          <path d="M30 78 Q 90 62 140 78 T 250 78" fill="none" stroke="#3282b8" stroke-width="2" marker-end="url(#mB2)"/>
+          <line x1="72" y1="108" x2="72" y2="82" stroke="#e74c3c" stroke-width="2" marker-end="url(#mR2)"/>
+          <line x1="140" y1="108" x2="140" y2="82" stroke="#e74c3c" stroke-width="2" marker-end="url(#mR2)"/>
+          <line x1="208" y1="108" x2="208" y2="82" stroke="#e74c3c" stroke-width="2" marker-end="url(#mR2)"/>
+          <rect x="28" y="112" width="224" height="30" rx="5" fill="#e74c3c" opacity="0.85"/>
+          <text x="140" y="132" text-anchor="middle" font-size="12.5" fill="#fff">高温壁面 T_w</text>
+          <text x="140" y="168" text-anchor="middle" font-size="12" fill="#90a4ae">流体宏观位移</text>
+        </svg>
+        <figcaption><strong>热对流 / 对流换热</strong><br>流体宏观运动引起的热量迁移</figcaption>
+      </figure>
+
+      <!-- 热辐射 -->
+      <figure>
+        <svg viewBox="0 0 280 180" role="img" aria-label="热辐射示意图">
+          <defs>
+            <marker id="mY3" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto">
+              <path d="M0,0 L10,5 L0,10 z" fill="#e67e22"/>
+            </marker>
+          </defs>
+          <circle cx="140" cy="88" r="28" fill="#e74c3c"/>
+          <text x="140" y="93" text-anchor="middle" font-size="13" fill="#fff" font-weight="600">T</text>
+          <line x1="176" y1="88"  x2="204" y2="88"  stroke="#e67e22" stroke-width="2" marker-end="url(#mY3)"/>
+          <line x1="165" y1="63"  x2="185" y2="44"  stroke="#e67e22" stroke-width="2" marker-end="url(#mY3)"/>
+          <line x1="140" y1="52"  x2="140" y2="26"  stroke="#e67e22" stroke-width="2" marker-end="url(#mY3)"/>
+          <line x1="115" y1="63"  x2="95"  y2="44"  stroke="#e67e22" stroke-width="2" marker-end="url(#mY3)"/>
+          <line x1="104" y1="88"  x2="76"  y2="88"  stroke="#e67e22" stroke-width="2" marker-end="url(#mY3)"/>
+          <line x1="115" y1="113" x2="95"  y2="132" stroke="#e67e22" stroke-width="2" marker-end="url(#mY3)"/>
+          <line x1="140" y1="124" x2="140" y2="150" stroke="#e67e22" stroke-width="2" marker-end="url(#mY3)"/>
+          <line x1="165" y1="113" x2="185" y2="132" stroke="#e67e22" stroke-width="2" marker-end="url(#mY3)"/>
+          <text x="140" y="172" text-anchor="middle" font-size="12" fill="#90a4ae">无需介质，可在真空中传播</text>
+        </svg>
+        <figcaption><strong>热辐射</strong><br>物体因热发射电磁波，E ∝ T⁴</figcaption>
+      </figure>
+    </div>
+
+    <h4>（1）热传导（Thermal Conduction）</h4>
+    <p>热量从物体内温度较高的部分传递到温度较低的部分，或传递到与之接触的另一物体。
+      其特点是<strong>没有物质的宏观位移</strong>。在固体中，热传导主要通过自由电子（导电体）
+      或晶格振动（非导电体）来实现；在气体中，则依靠分子不规则热运动时的相互碰撞。</p>
+
+    <h4>（2）热对流（Thermal Convection）</h4>
+    <p>流体内部质点发生相对位移的热量传递过程。按流体质点运动的原因可分为
+      <strong>自然对流</strong>（温差引起的密度差驱动）和<strong>强制对流</strong>（泵、风机等外力驱动）。
+      工程中更常见的是<strong>对流换热</strong>，即流体与固体壁面之间的热量交换。</p>
+
+    <h4>（3）热辐射（Thermal Radiation）</h4>
+    <p>物体因热的原因发出辐射能的过程。热辐射的本质是电磁波传播，
+      它<strong>不需要任何物质作为媒介</strong>，可以在真空中传播。
+      辐射传热不仅发生能量转移，还伴随能量形式的转化（热能 ⇌ 辐射能）。</p>
+
+    <h3>1.2　热传导的基本定律——傅里叶定律</h3>
+    <p>傅里叶定律描述热传导现象的物理规律：</p>
+
+    <div class="formula key">
+      \[ q = -\lambda \frac{\mathrm{d}T}{\mathrm{d}x} \qquad\text{(热流密度形式)} \]
+      \[ Q = -\lambda A \frac{\mathrm{d}T}{\mathrm{d}x} \qquad\text{(热流量形式)} \]
+    </div>
+
+    <table>
+      <thead><tr><th>符号</th><th>含义</th><th>单位</th></tr></thead>
+      <tbody>
+        <tr><td>\(Q\)</td><td>导热速率</td><td>W（或 J/s）</td></tr>
+        <tr><td>\(q\)</td><td>热流密度</td><td>W/m²</td></tr>
+        <tr><td>\(A\)</td><td>导热面积</td><td>m²</td></tr>
+        <tr><td>\(\lambda\)</td><td>导热系数（热导率）</td><td>W/(m·K)</td></tr>
+        <tr><td>\(\mathrm{d}T/\mathrm{d}x\)</td><td>温度梯度</td><td>K/m</td></tr>
+      </tbody>
+    </table>
+
+    <p>负号表示<strong>热量沿温度降低的方向传递</strong>。导热系数 \(\lambda\) 在数值上等于
+      单位温度梯度下的热通量，是表征物质导热能力的重要物性参数。</p>
+
+    <figure>
+      <svg viewBox="0 0 470 235" role="img" aria-label="一维平壁稳态导热与温度分布">
+        <defs>
+          <marker id="mAxA" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto">
+            <path d="M0,0 L10,5 L0,10 z" fill="#44586b"/>
+          </marker>
+          <linearGradient id="gWall" x1="0" y1="0" x2="1" y2="0">
+            <stop offset="0%" stop-color="#f5b041"/>
+            <stop offset="100%" stop-color="#5dade2"/>
+          </linearGradient>
+        </defs>
+
+        <!-- 平壁 -->
+        <rect x="66" y="62" width="72" height="130" fill="url(#gWall)" stroke="#90a4ae"/>
+        <text x="60" y="54" text-anchor="middle" font-size="13" fill="#e67e22" font-weight="600">T₁</text>
+        <text x="144" y="54" text-anchor="middle" font-size="13" fill="#2980b9" font-weight="600">T₂</text>
+        <text x="102" y="212" text-anchor="middle" font-size="12.5" fill="#5a6b7c">平壁</text>
+
+        <!-- 坐标系 -->
+        <line x1="212" y1="192" x2="212" y2="48" stroke="#44586b" stroke-width="1.5" marker-end="url(#mAxA)"/>
+        <line x1="212" y1="192" x2="430" y2="192" stroke="#44586b" stroke-width="1.5" marker-end="url(#mAxA)"/>
+        <text x="200" y="52" font-size="13" fill="#44586b" font-weight="600">T</text>
+        <text x="432" y="197" font-size="13" fill="#44586b" font-weight="600">x</text>
+
+        <!-- 温度分布 -->
+        <line x1="252" y1="70" x2="382" y2="158" stroke="#e74c3c" stroke-width="3"/>
+        <line x1="252" y1="70" x2="252" y2="192" stroke="#b0bec5" stroke-dasharray="4 4"/>
+        <line x1="382" y1="158" x2="382" y2="192" stroke="#b0bec5" stroke-dasharray="4 4"/>
+        <text x="252" y="212" text-anchor="middle" font-size="12" fill="#5a6b7c">x = 0</text>
+        <text x="382" y="212" text-anchor="middle" font-size="12" fill="#5a6b7c">x = δ</text>
+        <text x="322" y="102" font-size="12.5" fill="#e74c3c">T(x) 线性分布</text>
+      </svg>
+      <figcaption>图 1-1　一维平壁稳态导热：温度沿厚度方向线性分布，热流密度为常数</figcaption>
+    </figure>
+
+    <h3>1.3　热导率的物理意义及影响因素</h3>
+    <p>导热系数 \(\lambda\) 反映物质的导热能力，其值取决于物质的结构、组成、密度、温度和压力等因素。
+      在工程温度范围内，大多数材料的导热系数可近似为温度的线性函数：</p>
+
+    <div class="formula">
+      \[ \lambda = \lambda_0(1 + aT) \]
+    </div>
+
+    <p>其中 \(\lambda_0\) 为 0 °C 时的导热系数，\(a\) 为温度系数。<strong>大多数金属材料</strong>的
+      \(a<0\)，即温度升高导热系数下降；<strong>大多数非金属材料</strong>的 \(a>0\)，
+      即温度升高导热系数上升。各类材料导热系数的一般规律：</p>
+
+    <div class="formula">
+      \[ \lambda_{\text{导电固体}} > \lambda_{\text{非导电固体}} > \lambda_{\text{液体}} > \lambda_{\text{气体}} \]
+    </div>
+
+    <h3>1.4　对流换热的基本定律——牛顿冷却定律</h3>
+    <p>流体与固体壁面之间的对流换热，工程上用牛顿冷却定律描述：</p>
+
+    <div class="formula key">
+      \[ \Phi = \alpha A\,\Delta T \]
+    </div>
+
+    <p>式中：\(\Phi\) 为对流换热速率（W）；\(\alpha\) 为对流传热系数（表面传热系数），
+      单位 W/(m²·K)；\(A\) 为换热面积（m²）；\(\Delta T\) 为流体与壁面的温差（K）。</p>
+
+    <p>牛顿冷却定律实质上将对流传热的复杂性<strong>集中到了对流传热系数 \(\alpha\)</strong> 上。
+      \(\alpha\) 取决于流体流动状态、流体物性、壁面几何形状等因素，通常通过经验关联式确定。
+      例如，流体在圆管内作无相变强制湍流时的对流传热系数可表示为：</p>
+
+    <div class="formula">
+      \[ \alpha = 0.023\frac{\lambda}{d}\mathrm{Re}^{0.8}\mathrm{Pr}^{m} \]
+    </div>
+
+    <p>该关联式的适用范围为 \(\mathrm{Re} > 10000\)，\(0.7 < \mathrm{Pr} < 160\)，
+      定性温度为流体进出口温度的算术平均值。</p>
+
+    <h3>1.5　热辐射的基本定律——斯特藩-玻尔兹曼定律</h3>
+    <p>物体因热的原因发射辐射能，单位面积辐射力与绝对温度的四次方成正比：</p>
+
+    <div class="formula key">
+      \[ E = \varepsilon \sigma_0 T^{4} \]
+    </div>
+
+    <p>式中：\(E\) 为辐射力（W/m²）；\(\varepsilon\) 为发射率（黑度），\(0\le\varepsilon\le 1\)；
+      \(\sigma_0 = 5.67\times10^{-8}\ \mathrm{W/(m^2\cdot K^4)}\) 为斯特藩-玻尔兹曼常数；
+      \(T\) 为绝对温度（K）。</p>
+
+    <div class="note info">
+      <span class="ico">ℹ️</span>
+      <div>辐射传热与导热和对流有本质区别：<strong>它不需要任何物质作媒介</strong>，
+        且辐射力与温度的<strong>四次方</strong>成正比，高温下辐射传热将占主导地位。
+        在焊接、激光加工等高温过程中，辐射散热不可忽略。</div>
+    </div>
+
+    <h3>1.6　导热微分方程</h3>
+    <p>将傅里叶定律与能量守恒原理结合，可推导出描述物体内部温度分布的导热微分方程。
+      其基本思想是：对微元体做能量平衡——<em>导入热量 − 导出热量 + 内热源生成热 = 内能增量</em>。</p>
+
+    <figure>
+      <svg viewBox="0 0 460 230" role="img" aria-label="微元体热平衡示意">
+        <defs>
+          <marker id="mQx" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto">
+            <path d="M0,0 L10,5 L0,10 z" fill="#e74c3c"/>
+          </marker>
+          <marker id="mQb" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto">
+            <path d="M0,0 L10,5 L0,10 z" fill="#3282b8"/>
+          </marker>
+        </defs>
+
+        <!-- 微元体 -->
+        <polygon points="180,80 320,80 320,180 180,180" fill="#eaf3fb" stroke="#0f4c75" stroke-width="2"/>
+        <polygon points="180,80 230,55 370,55 320,80" fill="#dbe9f6" stroke="#0f4c75" stroke-width="2"/>
+        <polygon points="320,80 370,55 370,155 320,180" fill="#cfe0f0" stroke="#0f4c75" stroke-width="2"/>
+
+        <text x="250" y="135" text-anchor="middle" font-size="13" fill="#0f4c75" font-weight="600">dV = dx·dy·dz</text>
+
+        <!-- 热流箭头 -->
+        <line x1="120" y1="130" x2="172" y2="130" stroke="#e74c3c" stroke-width="2.5" marker-end="url(#mQx)"/>
+        <text x="118" y="118" font-size="12" fill="#e74c3c">Q_x</text>
+
+        <line x1="328" y1="130" x2="382" y2="130" stroke="#3282b8" stroke-width="2.5" marker-end="url(#mQb)"/>
+        <text x="358" y="118" font-size="12" fill="#3282b8">Q_x+dx</text>
+
+        <line x1="250" y1="26" x2="250" y2="48" stroke="#e67e22" stroke-width="2.5" marker-end="url(#mQx)"/>
+        <text x="258" y="24" font-size="12" fill="#e67e22">Q_y</text>
+
+        <line x1="250" y1="222" x2="250" y2="188" stroke="#3282b8" stroke-width="2.5" marker-end="url(#mQb)"/>
+        <text x="258" y="222" font-size="12" fill="#3282b8">Q_y+dy</text>
+
+        <!-- 内热源 -->
+        <circle cx="250" cy="130" r="7" fill="#f39c12"/>
+        <text x="250" y="112" text-anchor="middle" font-size="12" fill="#b35e0f">内热源 q̇_v</text>
+      </svg>
+      <figcaption>图 1-2　微元体能量平衡：导入 − 导出 + 内热源 = 内能增量</figcaption>
+    </figure>
+
+    <p><strong>三维非稳态导热微分方程（变物性、有内热源）：</strong></p>
+
+    <div class="formula key">
+      \[ \rho c \frac{\partial T}{\partial t} =
+         \frac{\partial}{\partial x}\!\left(\lambda \frac{\partial T}{\partial x}\right)
+       + \frac{\partial}{\partial y}\!\left(\lambda \frac{\partial T}{\partial y}\right)
+       + \frac{\partial}{\partial z}\!\left(\lambda \frac{\partial T}{\partial z}\right)
+       + \dot{q}_v \]
+    </div>
+
+    <p>式中：\(\rho\) 为密度（kg/m³）；\(c\) 为比热容（J/(kg·K)）；
+      \(\dot{q}_v\) 为内热源强度（W/m³）。</p>
+
+    <p><strong>常物性、无内热源时</strong>，方程简化为：</p>
+
+    <div class="formula">
+      \[ \frac{\partial T}{\partial t} = a\nabla^{2}T,
+         \qquad a = \frac{\lambda}{\rho c} \]
+    </div>
+
+    <p>其中 \(a\) 称为<strong>热扩散率</strong>（导温系数），表征物体在加热或冷却过程中
+      温度趋于均匀一致的能力。</p>
+
+    <div class="note warn">
+      <span class="ico">⚠️</span>
+      <div><strong>易混淆点：</strong>导热系数 \(\lambda\) 表征材料的<em>导热能力</em>；
+        热扩散率 \(a=\lambda/(\rho c)\) 表征<em>温度趋于均匀的能力</em>。
+        导热系数大的材料，若其热容也很大，温度趋于均匀的速度未必快。</div>
+    </div>
+
+    <h3>1.7　边界条件</h3>
+    <p>导热微分方程需要配合边界条件才能求解。传热学中常见的边界条件分为三类：</p>
+
+    <div class="fig-grid">
+      <figure>
+        <svg viewBox="0 0 220 175" role="img" aria-label="第一类边界条件">
+          <rect x="30" y="62" width="160" height="70" fill="#dbe6f0" stroke="#0f4c75" stroke-width="1.5"/>
+          <line x1="30" y1="62" x2="190" y2="62" stroke="#e74c3c" stroke-width="4.5"/>
+          <text x="110" y="40" text-anchor="middle" font-size="12.5" fill="#e74c3c" font-weight="600">T = T_w（给定温度）</text>
+          <text x="110" y="103" text-anchor="middle" font-size="13" fill="#0f4c75">固体域 Ω</text>
+          <text x="110" y="160" text-anchor="middle" font-size="12.5" fill="#5a6b7c">Γ₁：Dirichlet（强制）</text>
+        </svg>
+        <figcaption><strong>第一类边界条件</strong><br>给定边界温度</figcaption>
+      </figure>
+
+      <figure>
+        <svg viewBox="0 0 220 175" role="img" aria-label="第二类边界条件">
+          <defs>
+            <marker id="mOr" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto">
+              <path d="M0,0 L10,5 L0,10 z" fill="#e67e22"/>
+            </marker>
+          </defs>
+          <text x="110" y="24" text-anchor="middle" font-size="12.5" fill="#e67e22" font-weight="600">q = q_w（给定热流）</text>
+          <line x1="52" y1="38" x2="52" y2="58" stroke="#e67e22" stroke-width="2" marker-end="url(#mOr)"/>
+          <line x1="110" y1="38" x2="110" y2="58" stroke="#e67e22" stroke-width="2" marker-end="url(#mOr)"/>
+          <line x1="168" y1="38" x2="168" y2="58" stroke="#e67e22" stroke-width="2" marker-end="url(#mOr)"/>
+          <line x1="30" y1="62" x2="190" y2="62" stroke="#e67e22" stroke-width="4.5"/>
+          <rect x="30" y="62" width="160" height="70" fill="#dbe6f0" stroke="#0f4c75" stroke-width="1.5"/>
+          <text x="110" y="103" text-anchor="middle" font-size="13" fill="#0f4c75">固体域 Ω</text>
+          <text x="110" y="160" text-anchor="middle" font-size="12.5" fill="#5a6b7c">Γ₂：Neumann（自然）</text>
+        </svg>
+        <figcaption><strong>第二类边界条件</strong><br>给定边界热流密度</figcaption>
+      </figure>
+
+      <figure>
+        <svg viewBox="0 0 220 175" role="img" aria-label="第三类边界条件">
+          <defs>
+            <marker id="mRd" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto">
+              <path d="M0,0 L10,5 L0,10 z" fill="#e74c3c"/>
+            </marker>
+          </defs>
+          <rect x="20" y="18" width="180" height="40" rx="6" fill="#e8f4fb" stroke="#a9cce3" stroke-dasharray="5 3"/>
+          <text x="110" y="43" text-anchor="middle" font-size="12.5" fill="#2980b9" font-weight="600">流体 T_f , h</text>
+          <line x1="68" y1="62" x2="68" y2="78" stroke="#e74c3c" stroke-width="2" marker-end="url(#mRd)"/>
+          <line x1="110" y1="62" x2="110" y2="78" stroke="#e74c3c" stroke-width="2" marker-end="url(#mRd)"/>
+          <line x1="152" y1="62" x2="152" y2="78" stroke="#e74c3c" stroke-width="2" marker-end="url(#mRd)"/>
+          <rect x="30" y="82" width="160" height="58" fill="#dbe6f0" stroke="#0f4c75" stroke-width="1.5"/>
+          <text x="110" y="117" text-anchor="middle" font-size="12.5" fill="#0f4c75">固体 T_w</text>
+          <text x="110" y="162" text-anchor="middle" font-size="12.5" fill="#5a6b7c">Γ₃：Robin（自然）</text>
+        </svg>
+        <figcaption><strong>第三类边界条件</strong><br>给定对流换热系数与流体温度</figcaption>
+      </figure>
+    </div>
+
+    <h4>第一类边界条件（Dirichlet 条件）</h4>
+    <p>给定边界上的温度值：</p>
+    <div class="formula">
+      \[ T\big|_{\Gamma_1} = T_w(x,y,z,t) \]
+    </div>
+    <p>最简单的形式是边界温度为常数。在有限元中，第一类边界条件为<strong>强制边界条件</strong>，
+      需要直接对节点温度施加约束。</p>
+
+    <h4>第二类边界条件（Neumann 条件）</h4>
+    <p>给定边界上的热流密度：</p>
+    <div class="formula">
+      \[ -\lambda \frac{\partial T}{\partial n}\bigg|_{\Gamma_2} = q_w(x,y,z,t) \]
+    </div>
+    <p>当热流密度为零时，表示<strong>绝热边界</strong>。在有限元中，第二类边界条件为
+      <strong>自然边界条件</strong>，通过载荷向量引入。</p>
+
+    <h4>第三类边界条件（Robin 条件）</h4>
+    <p>给定边界上物体与流体间的表面传热系数及流体温度：</p>
+    <div class="formula">
+      \[ -\lambda \frac{\partial T}{\partial n}\bigg|_{\Gamma_3} = h\,(T_w - T_f) \]
+    </div>
+    <p>其中 \(h\) 为对流换热系数，\(T_f\) 为周围流体温度。第三类边界条件也是
+      <strong>自然边界条件</strong>。</p>
+
+    <p>此外，非稳态问题还需要<strong>初始条件</strong>：</p>
+    <div class="formula">
+      \[ T(x,y,z,0) = T_0(x,y,z) \]
+    </div>
+  </section>
+
+
+  <!-- ========== 第二章 ========== -->
+  <section class="card" id="ch2">
+    <h2>第二章　稳态传热问题有限元公式推导</h2>
+
+    <h3>2.1　稳态热传导的控制方程</h3>
+    <p>稳态条件下 \(\partial T/\partial t = 0\)，三维稳态热传导方程为：</p>
+
+    <div class="formula key">
+      \[ \frac{\partial}{\partial x}\!\left(\lambda \frac{\partial T}{\partial x}\right)
+       + \frac{\partial}{\partial y}\!\left(\lambda \frac{\partial T}{\partial y}\right)
+       + \frac{\partial}{\partial z}\!\left(\lambda \frac{\partial T}{\partial z}\right)
+       + \dot{q}_v = 0 \]
+    </div>
+
+    <p>简写为：</p>
+    <div class="formula">
+      \[ \nabla \cdot (\lambda \nabla T) + \dot{q}_v = 0 \]
+    </div>
+
+    <h3>2.2　加权残量法与 Galerkin 法</h3>
+    <p>有限元法求解稳态热传导问题的核心思想，是将微分方程转化为等效的积分形式，
+      然后对求解域进行离散。</p>
+
+    <p><strong>加权残量法的基本步骤：</strong></p>
+    <p>设 \(T\) 为精确解，\(\tilde{T}\) 为近似解。将 \(\tilde{T}\) 代入控制方程，产生残量：</p>
+
+    <div class="formula">
+      \[ R = \nabla \cdot (\lambda \nabla \tilde{T}) + \dot{q}_v \neq 0 \]
+    </div>
+
+    <p>选取一组权函数 \(w_i\)，令残量在域内的加权积分为零：</p>
+    <div class="formula">
+      \[ \int_\Omega w_i R \,\mathrm{d}\Omega = 0 \]
+    </div>
+
+    <p><strong>Galerkin 法</strong>取权函数等于形函数本身（\(w_i = N_i\)），
+      这是有限元法中最常用的加权残量方法：</p>
+
+    <div class="formula key">
+      \[ \int_\Omega N_i \big[\nabla \cdot (\lambda \nabla \tilde{T}) + \dot{q}_v\big]\,\mathrm{d}\Omega = 0 \]
+    </div>
+
+    <h3>2.3　弱形式的推导（分部积分）</h3>
+    <p>直接使用上述积分形式不便，因为残量中含有二阶导数。通过对含二阶导数项施加
+      <strong>分部积分</strong>（即格林公式），可降低对近似解连续性的要求，
+      得到<strong>弱形式</strong>。</p>
+
+    <p>对 \(\int_\Omega N_i \nabla \cdot (\lambda \nabla \tilde{T}) \,\mathrm{d}\Omega\)
+      运用格林公式：</p>
+
+    <div class="formula">
+      \[ \int_\Omega N_i \nabla \cdot (\lambda \nabla \tilde{T}) \,\mathrm{d}\Omega
+       = -\int_\Omega \lambda \nabla N_i \cdot \nabla \tilde{T} \,\mathrm{d}\Omega
+       + \oint_\Gamma N_i \lambda \frac{\partial \tilde{T}}{\partial n} \,\mathrm{d}\Gamma \]
+    </div>
+
+    <p>代入加权残量方程，得到弱形式：</p>
+
+    <div class="formula key">
+      \[ \int_\Omega \lambda \nabla N_i \cdot \nabla \tilde{T} \,\mathrm{d}\Omega
+       = \int_\Omega N_i \dot{q}_v \,\mathrm{d}\Omega
+       + \oint_\Gamma N_i \lambda \frac{\partial \tilde{T}}{\partial n} \,\mathrm{d}\Gamma \]
+    </div>
+
+    <div class="note tip">
+      <span class="ico">💡</span>
+      <div>弱形式中只出现温度的<strong>一阶导数</strong>，对近似解的要求降低，
+        且边界上的热流项可以通过边界条件<strong>自然引入</strong>——
+        这正是第二、三类边界条件被称为「自然边界条件」的原因。</div>
+    </div>
+
+    <h3>2.4　有限元离散</h3>
+    <p>将求解域 \(\Omega\) 离散为有限个单元。在每个单元 \(e\) 内，
+      温度场用节点温度的线性组合表示：</p>
+
+    <div class="formula">
+      \[ T^e(x,y) = \sum_{j=1}^{r} N_j(x,y)\, T_j^e \]
+    </div>
+
+    <p>其中 \(r\) 为单元节点数，\(N_j\) 为形函数，\(T_j^e\) 为节点温度。
+      将形函数作为权函数代入弱形式，对所有单元求和后得到总体方程。</p>
+
+    <figure>
+      <svg viewBox="0 0 430 270" role="img" aria-label="有限元网格离散示意图">
+        <defs>
+          <marker id="mNd" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto">
+            <path d="M0,0 L10,5 L0,10 z" fill="#c0392b"/>
+          </marker>
+        </defs>
+
+        <!-- 求解域 -->
+        <rect x="50" y="35" width="320" height="180" fill="#f4f8fc" stroke="#0f4c75" stroke-width="2"/>
+
+        <!-- 竖网格线 -->
+        <line x1="130" y1="35" x2="130" y2="215" stroke="#b0bec5" stroke-width="1"/>
+        <line x1="210" y1="35" x2="210" y2="215" stroke="#b0bec5" stroke-width="1"/>
+        <line x1="290" y1="35" x2="290" y2="215" stroke="#b0bec5" stroke-width="1"/>
+        <!-- 横网格线 -->
+        <line x1="50" y1="95"  x2="370" y2="95"  stroke="#b0bec5" stroke-width="1"/>
+        <line x1="50" y1="155" x2="370" y2="155" stroke="#b0bec5" stroke-width="1"/>
+        <!-- 对角线 -->
+        <line x1="50"  y1="35"  x2="130" y2="95"  stroke="#b0bec5" stroke-width="1"/>
+        <line x1="130" y1="35"  x2="210" y2="95"  stroke="#b0bec5" stroke-width="1"/>
+        <line x1="210" y1="35"  x2="290" y2="95"  stroke="#b0bec5" stroke-width="1"/>
+        <line x1="290" y1="35"  x2="370" y2="95"  stroke="#b0bec5" stroke-width="1"/>
+        <line x1="50"  y1="95"  x2="130" y2="155" stroke="#b0bec5" stroke-width="1"/>
+        <line x1="130" y1="95"  x2="210" y2="155" stroke="#b0bec5" stroke-width="1"/>
+        <line x1="210" y1="95"  x2="290" y2="155" stroke="#b0bec5" stroke-width="1"/>
+        <line x1="290" y1="95"  x2="370" y2="155" stroke="#b0bec5" stroke-width="1"/>
+        <line x1="50"  y1="155" x2="130" y2="215" stroke="#b0bec5" stroke-width="1"/>
+        <line x1="130" y1="155" x2="210" y2="215" stroke="#b0bec5" stroke-width="1"/>
+        <line x1="210" y1="155" x2="290" y2="215" stroke="#b0bec5" stroke-width="1"/>
+        <line x1="290" y1="155" x2="370" y2="215" stroke="#b0bec5" stroke-width="1"/>
+
+        <!-- 高亮单元 -->
+        <polygon points="130,95 210,95 210,155" fill="#e67e22" opacity="0.34" stroke="#e67e22" stroke-width="2.2"/>
+
+        <!-- 节点 -->
+        <circle cx="130" cy="95"  r="4.2" fill="#e74c3c"/>
+        <circle cx="210" cy="95"  r="4.2" fill="#e74c3c"/>
+        <circle cx="210" cy="155" r="4.2" fill="#e74c3c"/>
+        <text x="118" y="88"  font-size="12" fill="#c0392b" font-weight="600">i</text>
+        <text x="215" y="88"  font-size="12" fill="#c0392b" font-weight="600">j</text>
+        <text x="216" y="170" font-size="12" fill="#c0392b" font-weight="600">m</text>
+
+        <text x="243" y="132" font-size="13" fill="#b35e0f" font-weight="600">单元 e</text>
+
+        <!-- 标注 -->
+        <text x="210" y="245" text-anchor="middle" font-size="12.5" fill="#5a6b7c">求解域 Ω 被离散为三角形单元</text>
+        <line x1="50" y1="35" x2="40" y2="28" stroke="#0f4c75" stroke-width="1"/>
+        <text x="26" y="26" font-size="12" fill="#0f4c75">Γ</text>
+      </svg>
+      <figcaption>图 2-1　求解域的有限元离散与单元节点编号</figcaption>
+    </figure>
+
+    <p><strong>单元刚度矩阵（热传导矩阵）：</strong></p>
+    <div class="formula key">
+      \[ K_{ij}^e = \int_{\Omega_e} \lambda \left(
+         \frac{\partial N_i}{\partial x}\frac{\partial N_j}{\partial x}
+       + \frac{\partial N_i}{\partial y}\frac{\partial N_j}{\partial y}
+       \right) \mathrm{d}\Omega \]
+    </div>
+
+    <p><strong>单元载荷向量：</strong></p>
+    <div class="formula key">
+      \[ F_i^e = \int_{\Omega_e} N_i \dot{q}_v \,\mathrm{d}\Omega
+              + \oint_{\Gamma_e} N_i q_w \,\mathrm{d}\Gamma
+              + \oint_{\Gamma_e} N_i h\,(T_f - T)\,\mathrm{d}\Gamma \]
+    </div>
+
+    <p>其中第二项来自第二类边界条件（给定热流），第三项来自第三类边界条件（对流换热）。</p>
+
+    <h3>2.5　总体方程组装与求解</h3>
+    <p>将所有单元矩阵组装成总体矩阵和总体载荷向量：</p>
+
+    <div class="formula key">
+      \[ [K]\{T\} = \{F\} \]
+    </div>
+
+    <p>其中 \([K]\) 为总体热传导矩阵（对称、正定、稀疏），\(\{T\}\) 为节点温度向量，
+      \(\{F\}\) 为总体载荷向量。</p>
+
+    <p>对于第一类边界条件，在组装完成后<strong>直接对相应节点施加温度约束</strong>，
+      然后求解线性代数方程组，得到节点温度分布。得到温度场后，
+      可利用傅里叶定律进一步计算热流密度。</p>
+
+    <div class="note info">
+      <span class="ico">ℹ️</span>
+      <div><strong>工程提示：</strong>实际材料加工模拟中，材料热导率 \(\lambda\) 通常随温度变化，
+        此时 \([K]\) 成为温度的函数，需要采用<strong>迭代求解</strong>
+        （如 Newton-Raphson 法或直接迭代法）直至收敛。</div>
+    </div>
+  </section>
+
+
+  <!-- ========== 第三章 ========== -->
+  <section class="card" id="ch3">
+    <h2>第三章　瞬态传热问题有限元公式推导</h2>
+
+    <h3>3.1　瞬态热传导的控制方程</h3>
+    <p>瞬态（非稳态）热传导方程保留了温度对时间的导数项：</p>
+
+    <div class="formula key">
+      \[ \rho c \frac{\partial T}{\partial t} = \nabla \cdot (\lambda \nabla T) + \dot{q}_v \]
+    </div>
+
+    <h3>3.2　空间离散——从弱形式到半离散方程</h3>
+    <p>瞬态问题的有限元处理分两步：<strong>先空间离散，再时间离散</strong>。</p>
+    <p>空间离散过程与稳态问题类似，但温度场同时是空间和时间的函数。在单元内近似为：</p>
+
+    <div class="formula">
+      \[ T^e(x,y,t) = \sum_{j=1}^{r} N_j(x,y)\, T_j^e(t) \]
+    </div>
+
+    <p>代入弱形式并离散后，得到<strong>半离散方程</strong>（仅时间连续）：</p>
+
+    <div class="formula key">
+      \[ [C]\{\dot{T}\} + [K]\{T\} = \{F\} \]
+    </div>
+
+    <p>其中：</p>
+    <ul>
+      <li>\([C]\) 为<strong>热容矩阵</strong>（容量矩阵），
+        \(C_{ij} = \int_{\Omega} \rho c\, N_i N_j \,\mathrm{d}\Omega\)；</li>
+      <li>\([K]\) 为<strong>热传导刚度矩阵</strong>（与稳态问题相同）；</li>
+      <li>\(\{F\}\) 为<strong>载荷向量</strong>。</li>
+    </ul>
+
+    <p>热容矩阵的物理意义是表征单元<strong>储存热量的能力</strong>。
+      对于集中质量法，可将 \([C]\) 进行对角化处理以提高计算效率。</p>
+
+    <h3>3.3　时间离散——广义梯形法（θ 法）</h3>
+    <p>半离散方程 \([C]\{\dot{T}\} + [K]\{T\} = \{F\}\) 是一组关于时间的常微分方程，
+      需要时间积分方案进行求解。</p>
+
+    <p><strong>广义梯形法</strong>（又称 θ 法）是一种常用且灵活的时间积分方案。
+      设时间步长为 \(\Delta t\)，温度在 \(t_n\) 到 \(t_{n+1}\) 之间线性插值：</p>
+
+    <div class="formula">
+      \[ \theta\{\dot{T}\}_{n+1} + (1-\theta)\{\dot{T}\}_n
+         = \frac{\{T\}_{n+1} - \{T\}_n}{\Delta t} \]
+    </div>
+
+    <p>将半离散方程分别写在第 \(n\) 步和第 \(n+1\) 步：</p>
+
+    <div class="formula">
+      \[ [C]\{\dot{T}\}_{n+1} + [K]\{T\}_{n+1} = \{F\}_{n+1} \]
+      \[ [C]\{\dot{T}\}_{n} + [K]\{T\}_{n} = \{F\}_{n} \]
+    </div>
+
+    <p>联立消去 \(\{\dot{T}\}\)，得到递推公式：</p>
+
+    <div class="formula key">
+      \[ \big([C] + \theta\Delta t[K]\big)\{T\}_{n+1}
+         = \big([C] - (1-\theta)\Delta t[K]\big)\{T\}_n
+         + \Delta t\big[\theta\{F\}_{n+1} + (1-\theta)\{F\}_n\big] \]
+    </div>
+
+    <figure>
+      <svg viewBox="0 0 460 235" role="img" aria-label="时间离散与温度衰减曲线">
+        <defs>
+          <marker id="mAxT" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto">
+            <path d="M0,0 L10,5 L0,10 z" fill="#44586b"/>
+          </marker>
+        </defs>
+
+        <!-- 坐标轴 -->
+        <line x1="62" y1="192" x2="428" y2="192" stroke="#44586b" stroke-width="1.5" marker-end="url(#mAxT)"/>
+        <line x1="62" y1="192" x2="62" y2="34" stroke="#44586b" stroke-width="1.5" marker-end="url(#mAxT)"/>
+        <text x="432" y="197" font-size="13" fill="#44586b" font-weight="600">t</text>
+        <text x="48" y="40" font-size="13" fill="#44586b" font-weight="600">T</text>
+
+        <!-- 精确解 -->
+        <path d="M62 52 C 150 58, 210 100, 268 122 C 330 145, 385 166, 420 178"
+              fill="none" stroke="#b0bec5" stroke-width="2.2" stroke-dasharray="7 5"/>
+        <text x="330" y="146" font-size="12.5" fill="#90a4ae">精确解 T(t)</text>
+
+        <!-- 数值解折线 -->
+        <polyline points="62,52 112,76 162,100 212,120 262,137 312,152 362,164 412,174"
+                   fill="none" stroke="#e74c3c" stroke-width="2.4"/>
+
+        <!-- 节点 -->
+        <circle cx="62"  cy="52"  r="4" fill="#e74c3c"/>
+        <circle cx="112" cy="76"  r="4" fill="#e74c3c"/>
+        <circle cx="162" cy="100" r="4" fill="#e74c3c"/>
+        <circle cx="212" cy="120" r="4" fill="#e74c3c"/>
+        <circle cx="262" cy="137" r="4" fill="#e74c3c"/>
+        <circle cx="312" cy="152" r="4" fill="#e74c3c"/>
+        <circle cx="362" cy="164" r="4" fill="#e74c3c"/>
+
+        <!-- 时间步标注 -->
+        <line x1="212" y1="192" x2="212" y2="126" stroke="#3282b8" stroke-dasharray="4 3"/>
+        <line x1="262" y1="192" x2="262" y2="143" stroke="#3282b8" stroke-dasharray="4 3"/>
+        <text x="212" y="212" text-anchor="middle" font-size="12" fill="#3282b8">t_n</text>
+        <text x="262" y="212" text-anchor="middle" font-size="12" fill="#3282b8">t_n+1</text>
+
+        <!-- Δt 标注 -->
+        <line x1="212" y1="228" x2="262" y2="228" stroke="#e67e22" stroke-width="1.6"/>
+        <line x1="212" y1="222" x2="212" y2="234" stroke="#e67e22" stroke-width="1.6"/>
+        <line x1="262" y1="222" x2="262" y2="234" stroke="#e67e22" stroke-width="1.6"/>
+        <text x="237" y="222" text-anchor="middle" font-size="12" fill="#e67e22" font-weight="600">Δt</text>
+      </svg>
+      <figcaption>图 3-1　瞬态温度场的时间离散：θ 法递推求解示意</figcaption>
+    </figure>
+
+    <h3>3.4　不同时间积分方案</h3>
+    <p>θ 的不同取值对应不同的时间积分方案：</p>
+
+    <table>
+      <thead>
+        <tr><th>θ 值</th><th>方案名称</th><th>精度</th><th>稳定性</th><th>特点</th></tr>
+      </thead>
+      <tbody>
+        <tr><td>θ = 0</td><td>向前差分（显式 Euler）</td><td>一阶</td><td>条件稳定</td>
+          <td>计算简单，但时间步长受稳定条件限制</td></tr>
+        <tr><td>θ = 1/2</td><td>Crank-Nicolson</td><td>二阶</td><td>无条件稳定</td>
+          <td>精度高，但温度急剧变化时可能产生振荡</td></tr>
+        <tr><td>θ = 2/3</td><td>Galerkin 法</td><td>二阶</td><td>无条件稳定</td>
+          <td>精度与稳定性的良好折中</td></tr>
+        <tr><td>θ = 1</td><td>向后差分（隐式 Euler）</td><td>一阶</td><td>无条件稳定</td>
+          <td>稳定性好，但精度相对较低</td></tr>
+      </tbody>
+    </table>
+
+    <div class="note tip">
+      <span class="ico">💡</span>
+      <div>在材料加工传热分析中，由于温度变化剧烈（如焊接热循环），
+        <strong>Crank-Nicolson 方案（θ = 1/2）</strong>和
+        <strong>Galerkin 方案（θ = 2/3）</strong>应用最为广泛。</div>
+    </div>
+
+    <h3>3.5　时间步长的选择</h3>
+    <p>时间步长的选择需兼顾<strong>精度</strong>和<strong>效率</strong>：</p>
+    <ul>
+      <li><strong>最小时间步长：</strong>应能分辨温度变化最快的阶段。
+        显式方案的经验准则为 \(\Delta t \le \dfrac{\rho c (\Delta x)^2}{6\lambda}\)。</li>
+      <li><strong>最大时间步长：</strong>在温度变化平缓的阶段可适当增大，以提高计算效率。</li>
+    </ul>
+
+    <p>对于相变问题（如铸造凝固），还需要在时间步长上处理<strong>相变潜热的释放</strong>，
+      常用方法包括等效比热法和焓法。</p>
+
+    <h4>典型算例：焊接热循环</h4>
+
+    <figure>
+      <svg viewBox="0 0 470 250" role="img" aria-label="焊接热循环曲线">
+        <defs>
+          <marker id="mAxW" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto">
+            <path d="M0,0 L10,5 L0,10 z" fill="#44586b"/>
+          </marker>
+        </defs>
+
+        <!-- 坐标轴 -->
+        <line x1="64" y1="200" x2="440" y2="200" stroke="#44586b" stroke-width="1.5" marker-end="url(#mAxW)"/>
+        <line x1="64" y1="200" x2="64" y2="34" stroke="#44586b" stroke-width="1.5" marker-end="url(#mAxW)"/>
+        <text x="444" y="205" font-size="13" fill="#44586b" font-weight="600">t</text>
+        <text x="50" y="40" font-size="13" fill="#44586b" font-weight="600">T</text>
+
+        <!-- A3 温度线 -->
+        <line x1="64" y1="100" x2="440" y2="100" stroke="#e67e22" stroke-width="1.6" stroke-dasharray="7 5"/>
+        <text x="410" y="94" font-size="12.5" fill="#e67e22" font-weight="600">A₃</text>
+
+        <!-- 热循环曲线 -->
+        <path d="M64 188
+                 C 96 186, 128 180, 150 158
+                 C 164 138, 170 74, 178 56
+                 C 186 74, 192 138, 208 158
+                 C 244 186, 320 192, 430 194"
+              fill="none" stroke="#e74c3c" stroke-width="2.6"/>
+
+        <!-- 峰值标注 -->
+        <line x1="178" y1="56" x2="178" y2="200" stroke="#c0392b" stroke-dasharray="4 3" opacity="0.5"/>
+        <text x="186" y="46" font-size="12.5" fill="#c0392b" font-weight="600">峰值温度 T_max</text>
+
+        <!-- 加热冷却标注 -->
+        <text x="108" y="140" font-size="12.5" fill="#e74c3c">加热</text>
+        <text x="250" y="150" font-size="12.5" fill="#2980b9">冷却</text>
+
+        <!-- 室温线 -->
+        <line x1="64" y1="192" x2="440" y2="192" stroke="#90a4ae" stroke-dasharray="3 3"/>
+        <text x="66" y="216" font-size="12" fill="#90a4ae">室温 T₀</text>
+      </svg>
+      <figcaption>图 3-2　焊接热影响区某点的典型热循环曲线（峰值温度与 A₃ 相变温度示意）</figcaption>
+    </figure>
+
+    <div class="note warn">
+      <span class="ico">⚠️</span>
+      <div>焊接热循环的升温与降温速率可达 \(10^2 \sim 10^3\ \mathrm{K/s}\)，
+        要求时间步长取到 \(10^{-2}\sim10^{-1}\ \mathrm{s}\) 量级，
+        这对瞬态有限元分析的<strong>计算效率</strong>提出了很高要求，
+        工程中常采用<strong>自适应时间步长</strong>策略。</div>
+    </div>
+  </section>
+
+
+  <!-- ========== 第四章 ========== -->
+  <section class="card" id="ch4">
+    <h2>第四章　热应力和残余应力产生原因及有限元求解</h2>
+
+    <h3>4.1　热应力的产生原因</h3>
+    <p>热应力是指温度改变时，物体由于外在约束以及内部各部分之间的相互约束，
+      使其不能完全自由胀缩而产生的应力，也称<strong>变温应力</strong>。</p>
+
+    <p>热应力的产生主要有以下三种原因：</p>
+
+    <figure>
+      <svg viewBox="0 0 760 220" role="img" aria-label="热应力产生的三种原因">
+        <defs>
+          <marker id="mHs" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto">
+            <path d="M0,0 L10,5 L0,10 z" fill="#e74c3c"/>
+          </marker>
+          <marker id="mHs2" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto">
+            <path d="M0,0 L10,5 L0,10 z" fill="#2980b9"/>
+          </marker>
+        </defs>
+
+        <!-- (a) 外部约束 -->
+        <text x="125" y="26" text-anchor="middle" font-size="13.5" fill="#0f4c75" font-weight="600">(a) 外部约束</text>
+        <rect x="50" y="52" width="20" height="46" fill="#90a4ae"/>
+        <rect x="180" y="52" width="20" height="46" fill="#90a4ae"/>
+        <rect x="70" y="62" width="110" height="26" fill="#e74c3c" opacity="0.8"/>
+        <line x1="70" y1="75" x2="52" y2="75" stroke="#e74c3c" stroke-width="2.5" marker-end="url(#mHs)"/>
+        <line x1="180" y1="75" x2="198" y2="75" stroke="#e74c3c" stroke-width="2.5" marker-end="url(#mHs)"/>
+        <text x="125" y="128" text-anchor="middle" font-size="12" fill="#5a6b7c">两端固定，升温受阻</text>
+        <text x="125" y="148" text-anchor="middle" font-size="12" fill="#e74c3c">→ 产生压应力</text>
+
+        <!-- (b) 构件间温差 -->
+        <text x="380" y="26" text-anchor="middle" font-size="13.5" fill="#0f4c75" font-weight="600">(b) 构件间温差</text>
+        <rect x="305" y="52" width="70" height="46" fill="#e74c3c" opacity="0.8"/>
+        <rect x="385" y="52" width="70" height="46" fill="#5dade2" opacity="0.8"/>
+        <text x="340" y="80" text-anchor="middle" font-size="11.5" fill="#fff">T₁ 高</text>
+        <text x="420" y="80" text-anchor="middle" font-size="11.5" fill="#fff">T₂ 低</text>
+        <line x1="378" y1="75" x2="386" y2="75" stroke="#333" stroke-width="2"/>
+        <text x="380" y="128" text-anchor="middle" font-size="12" fill="#5a6b7c">热膨胀量不同</text>
+        <text x="380" y="148" text-anchor="middle" font-size="12" fill="#e74c3c">→ 相互约束产生应力</text>
+
+        <!-- (c) 内部温度梯度 -->
+        <text x="635" y="26" text-anchor="middle" font-size="13.5" fill="#0f4c75" font-weight="600">(c) 内部温度梯度</text>
+        <rect x="555" y="52" width="160" height="46" fill="url(#gCondGrad)" stroke="#90a4ae"/>
+        <defs>
+          <linearGradient id="gCondGrad" x1="0" y1="0" x2="1" y2="0">
+            <stop offset="0%" stop-color="#e74c3c"/>
+            <stop offset="100%" stop-color="#5dade2"/>
+          </linearGradient>
+        </defs>
+        <text x="585" y="80" font-size="11.5" fill="#fff">T高</text>
+        <text x="680" y="80" font-size="11.5" fill="#fff">T低</text>
+        <text x="635" y="128" text-anchor="middle" font-size="12" fill="#5a6b7c">各部分胀缩不均</text>
+        <text x="635" y="148" text-anchor="middle" font-size="12" fill="#e74c3c">→ 内部相互约束</text>
+      </svg>
+      <figcaption>图 4-1　热应力产生的三种主要原因</figcaption>
+    </figure>
+
+    <h4>（1）外部约束引起的热应力</h4>
+    <p>结构体构件在加热或冷却时发生热膨胀或收缩，如果受到外部约束（如固定支座、刚性连接），
+      自由变形无法实现，就会产生热应力。例如，两端固定的杆件在升温时无法伸长，
+      内部即产生压应力。</p>
+
+    <h4>（2）构件之间温差引起的热应力</h4>
+    <p>不同构件之间存在温度差时，由于各自的热膨胀量不同，相互约束导致热应力。
+      典型案例如热交换器管板与管束之间的温差。</p>
+
+    <h4>（3）构件内部温度梯度引起的热应力</h4>
+    <p>即使没有外部约束，物体内部存在温度梯度时，各部分的热膨胀量不同，
+      相互约束同样产生热应力。这是材料加工过程中<strong>最主要</strong>的热应力来源。
+      例如，焊接时焊缝附近温度远高于远离焊缝的区域，冷却过程中焊缝区收缩受到周围冷态金属的约束，
+      产生拉伸残余应力。</p>
+
+    <h3>4.2　热弹性本构方程</h3>
+    <p>在热弹性理论中，总应变由两部分组成：<strong>弹性应变</strong>和<strong>热应变</strong>：</p>
+
+    <div class="formula key">
+      \[ \varepsilon_{ij} = \varepsilon_{ij}^{e} + \varepsilon_{ij}^{th},
+         \qquad \varepsilon_{ij}^{th} = \alpha(T - T_0)\delta_{ij} \]
+    </div>
+
+    <p>\(\alpha\) 为热膨胀系数，\(T_0\) 为参考温度，\(\delta_{ij}\) 为 Kronecker 符号。</p>
+
+    <p><strong>热弹性本构方程</strong>（以应力表示应变）：</p>
+
+    <div class="formula key">
+      \[ \sigma_{ij} = \frac{E}{1+\nu}\left(\varepsilon_{ij}
+         + \frac{\nu}{1-2\nu}\varepsilon_{kk}\delta_{ij}\right)
+         - \frac{E\alpha(T-T_0)}{1-2\nu}\delta_{ij} \]
+    </div>
+
+    <p>其中 \(\sigma_{ij}\) 为应力张量，\(E\) 为弹性模量，\(\nu\) 为泊松比。</p>
+
+    <div class="note info">
+      <span class="ico">ℹ️</span>
+      <div>这一本构方程表明：<strong>温度变化相当于在应力-应变关系中引入了一个等效的"热载荷"</strong>，
+        它可以视为温度变化产生的初应力。</div>
+    </div>
+
+    <h3>4.3　热应力的有限元方程</h3>
+    <p>热应力的有限元求解通常采用<strong>顺序耦合</strong>方法：
+      先求解温度场（传热分析），再将温度作为热载荷进行力学分析。</p>
+
+    <figure>
+      <svg viewBox="0 0 700 190" role="img" aria-label="顺序耦合分析流程">
+        <defs>
+          <marker id="mFlow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto">
+            <path d="M0,0 L10,5 L0,10 z" fill="#3282b8"/>
+          </marker>
+        </defs>
+
+        <rect x="20" y="60" width="150" height="66" rx="10" fill="#e8f2fa" stroke="#3282b8" stroke-width="2"/>
+        <text x="95" y="88" text-anchor="middle" font-size="13.5" fill="#0f4c75" font-weight="600">① 传热分析</text>
+        <text x="95" y="110" text-anchor="middle" font-size="12" fill="#5a6b7c">求解 T(x,y,z,t)</text>
+
+        <line x1="176" y1="93" x2="218" y2="93" stroke="#3282b8" stroke-width="2" marker-end="url(#mFlow)"/>
+
+        <rect x="224" y="60" width="150" height="66" rx="10" fill="#fff3e4" stroke="#e67e22" stroke-width="2"/>
+        <text x="299" y="88" text-anchor="middle" font-size="13.5" fill="#b35e0f" font-weight="600">② 温度插值</text>
+        <text x="299" y="110" text-anchor="middle" font-size="12" fill="#8a6540">映射到力学网格</text>
+
+        <line x1="380" y1="93" x2="422" y2="93" stroke="#3282b8" stroke-width="2" marker-end="url(#mFlow)"/>
+
+        <rect x="428" y="60" width="150" height="66" rx="10" fill="#e8f2fa" stroke="#3282b8" stroke-width="2"/>
+        <text x="503" y="88" text-anchor="middle" font-size="13.5" fill="#0f4c75" font-weight="600">③ 力学分析</text>
+        <text x="503" y="110" text-anchor="middle" font-size="12" fill="#5a6b7c">热弹塑性求解</text>
+
+        <line x1="578" y1="93" x2="620" y2="93" stroke="#3282b8" stroke-width="2" marker-end="url(#mFlow)"/>
+
+        <rect x="626" y="60" width="60" height="66" rx="10" fill="#f1faf5" stroke="#27ae60" stroke-width="2"/>
+        <text x="656" y="88" text-anchor="middle" font-size="13" fill="#1e7c48" font-weight="600">σ</text>
+        <text x="656" y="110" text-anchor="middle" font-size="11" fill="#1e7c48">应力</text>
+
+        <text x="350" y="36" text-anchor="middle" font-size="13.5" fill="#0f4c75" font-weight="600">顺序耦合（弱耦合）分析流程</text>
+        <text x="350" y="166" text-anchor="middle" font-size="12" fill="#90a4ae">温度场结果作为体载荷驱动应力分析，不反向影响温度场</text>
+      </svg>
+      <figcaption>图 4-2　热-力顺序耦合分析流程</figcaption>
+    </figure>
+
+    <p><strong>热弹性有限元方程：</strong></p>
+
+    <div class="formula key">
+      \[ [K]\{u\} = \{F^{mech}\} + \{F^{th}\} \]
+    </div>
+
+    <p>其中：</p>
+    <ul>
+      <li>\([K]\) 为弹性刚度矩阵：\([K] = \int_\Omega [B]^{T}[D][B]\,\mathrm{d}\Omega\)；</li>
+      <li>\(\{u\}\) 为节点位移向量；</li>
+      <li>\(\{F^{mech}\}\) 为机械载荷向量；</li>
+      <li>\(\{F^{th}\}\) 为<strong>热载荷向量</strong>：
+        \(\{F^{th}\} = \int_\Omega [B]^{T}[D]\{\varepsilon^{th}\}\,\mathrm{d}\Omega\)。</li>
+    </ul>
+
+    <p>\([B]\) 为应变-位移矩阵，\([D]\) 为弹性矩阵。求解得到位移后，进一步计算应变和应力：</p>
+
+    <div class="formula">
+      \[ \{\sigma\} = [D]\big(\{\varepsilon\} - \{\varepsilon^{th}\}\big) \]
+    </div>
+
+    <h3>4.4　残余应力的形成机制</h3>
+    <p>残余应力是热应力在卸载（即外载荷去除、温度恢复均匀）后<strong>残留在物体内部的应力</strong>。
+      在材料加工过程中，残余应力的形成涉及更为复杂的机制。</p>
+
+    <p><strong>焊接残余应力的三种主要形成机制</strong>
+      （Macherauch 和 Wohlfahrt，1978）可以归纳为三种机制的叠加：</p>
+
+    <ol>
+      <li><strong>焊缝及热影响区的收缩。</strong>焊接冷却过程中，高温区（焊缝和热影响区）的收缩
+        受到周围较冷母材的约束，产生拉伸残余应力。这是焊接残余应力最主要的来源。</li>
+      <li><strong>表面快速冷却引起的残余应力</strong>（类似于淬火效应）。
+        焊缝表面的快速冷却使表层比内部收缩更快，表层受拉，内部受压。</li>
+      <li><strong>相变引起的残余应力。</strong>冷却过程中奥氏体向马氏体等硬相转变时伴随体积膨胀，
+        这种相变体积应变对残余应力分布有显著影响。研究表明，马氏体相变的体积应变对残余应力的影响
+        远大于奥氏体相变。较高的冷却速率还会在焊接残余应力分布中产生<strong>双峰特征</strong>。</li>
+    </ol>
+
+    <figure>
+      <svg viewBox="0 0 500 260" role="img" aria-label="焊接纵向残余应力分布">
+        <defs>
+          <marker id="mAxR" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto">
+            <path d="M0,0 L10,5 L0,10 z" fill="#44586b"/>
+          </marker>
+        </defs>
+
+        <!-- 坐标轴 -->
+        <line x1="40" y1="152" x2="462" y2="152" stroke="#44586b" stroke-width="1.5" marker-end="url(#mAxR)"/>
+        <line x1="250" y1="228" x2="250" y2="34" stroke="#44586b" stroke-width="1.5" marker-end="url(#mAxR)"/>
+        <text x="466" y="157" font-size="12" fill="#44586b">距焊缝中心距离</text>
+        <text x="258" y="34" font-size="12.5" fill="#44586b" font-weight="600">σ_x</text>
+
+        <!-- 焊缝中心线 -->
+        <line x1="250" y1="152" x2="250" y2="200" stroke="#e74c3c" stroke-width="1.4" stroke-dasharray="4 3"/>
+        <text x="250" y="216" text-anchor="middle" font-size="11.5" fill="#e74c3c">焊缝中心</text>
+
+        <!-- 应力曲线（关于 x=250 对称） -->
+        <path d="M62 190
+                 C 106 184, 124 152, 152 152
+                 C 178 152, 196 74, 222 70
+                 C 234 68, 243 104, 250 104
+                 C 257 104, 266 68, 278 70
+                 C 304 74, 322 152, 348 152
+                 C 376 152, 394 184, 438 190"
+              fill="none" stroke="#c0392b" stroke-width="2.8"/>
+
+        <!-- 峰值标注 -->
+        <circle cx="222" cy="70" r="4" fill="#e67e22"/>
+        <circle cx="278" cy="70" r="4" fill="#e67e22"/>
+        <text x="196" y="56" font-size="12" fill="#b35e0f" font-weight="600">峰值</text>
+        <text x="286" y="56" font-size="12" fill="#b35e0f" font-weight="600">峰值</text>
+
+        <!-- 区域标注 -->
+        <text x="140" y="118" font-size="12.5" fill="#c0392b" font-weight="600">拉应力区</text>
+        <text x="350" y="118" font-size="12.5" fill="#c0392b" font-weight="600">拉应力区</text>
+        <text x="76" y="212" font-size="12.5" fill="#2980b9" font-weight="600">压应力</text>
+        <text x="386" y="212" font-size="12.5" fill="#2980b9" font-weight="600">压应力</text>
+
+        <!-- 零应力线 -->
+        <text x="44" y="146" font-size="11.5" fill="#90a4ae">σ = 0</text>
+      </svg>
+      <figcaption>图 4-3　焊接纵向残余应力沿横向的分布（双峰特征）</figcaption>
+    </figure>
+
+    <h3>4.5　残余应力的热弹塑性有限元求解</h3>
+    <p>当热应力超过材料的屈服强度时，材料发生塑性变形，<strong>热弹性假设不再适用</strong>，
+      必须采用<strong>热弹塑性</strong>模型。</p>
+
+    <p><strong>热弹塑性本构方程的增量形式：</strong></p>
+
+    <div class="formula key">
+      \[ \{\mathrm{d}\sigma\} = [D]_{ep}\{\mathrm{d}\varepsilon\} - \{C\}_{ep}\,\mathrm{d}T \]
+    </div>
+
+    <p>其中 \([D]_{ep}\) 为弹塑性矩阵，\(\{C\}_{ep}\) 为热弹塑性耦合向量。</p>
+
+    <p><strong>热弹塑性有限元增量方程：</strong>根据虚位移原理，建立有限元增量方程：</p>
+
+    <div class="formula key">
+      \[ [K]_{ep}\{\Delta u\} = \{\Delta F\} + \{\Delta F^{th}\},
+         \qquad [K]_{ep} = \int_\Omega [B]^{T}[D]_{ep}[B]\,\mathrm{d}\Omega \]
+    </div>
+
+    <p><strong>求解流程：</strong></p>
+
+    <div class="flow">
+      <div class="flow-step io">① 热分析：求解瞬态温度场 T(x, y, z, t)</div>
+      <div class="flow-arrow"></div>
+      <div class="flow-step">② 温度插值：将温度场结果映射到力学网格节点</div>
+      <div class="flow-arrow"></div>
+      <div class="flow-step">③ 增量加载：将温度变化分步（增量）施加</div>
+      <div class="flow-arrow"></div>
+      <div class="flow-step">④ 计算热载荷增量 ΔF<sup>th</sup></div>
+      <div class="flow-arrow"></div>
+      <div class="flow-step hl">⑤ 组装弹塑性刚度矩阵 [K]<sub>ep</sub></div>
+      <div class="flow-arrow"></div>
+      <div class="flow-step">⑥ 求解 [K]<sub>ep</sub>{Δu} = {ΔF} + {ΔF<sup>th</sup>}，更新应力应变</div>
+      <div class="flow-arrow"></div>
+      <div class="flow-step">⑦ 判断收敛？ &nbsp;<span style="color:#c0392b">否 → 返回 ⑤</span></div>
+      <div class="flow-arrow"></div>
+      <div class="flow-step">⑧ 下一增量步？ &nbsp;<span style="color:#c0392b">是 → 返回 ③</span></div>
+      <div class="flow-arrow"></div>
+      <div class="flow-step io">⑨ 输出残余应力场</div>
+    </div>
+
+    <div class="note warn">
+      <span class="ico">⚠️</span>
+      <div>热弹塑性分析的计算量巨大，因为<strong>每个时间步都需要更新刚度矩阵并进行迭代</strong>。
+        在焊接等热循环剧烈的过程中，通常需要<strong>极小的时间步长</strong>以保证收敛。
+        工程中常采用<strong>固有应变法</strong>等简化方法降低计算成本。</div>
+    </div>
+  </section>
+
+
+  <!-- ========== 小结 ========== -->
+  <section class="card" id="summary">
+    <h2>本章小结</h2>
+    <p>本章从传热学基本概念出发，系统介绍了三种传热方式的基本定律、导热微分方程及边界条件；
+      在此基础上，分别推导了稳态和瞬态热传导问题的有限元公式，包括加权残量法、
+      Galerkin 弱形式、空间离散和时间积分方案；最后讨论了热应力和残余应力的产生原因
+      及热弹塑性有限元求解方法。</p>
+
+    <h3>关键公式速查表</h3>
+    <table>
+      <thead>
+        <tr><th>章节</th><th>关键公式</th><th>物理意义</th></tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>第一章</td>
+          <td>\(q = -\lambda \dfrac{\mathrm{d}T}{\mathrm{d}x}\)</td>
+          <td>傅里叶定律</td>
+        </tr>
+        <tr>
+          <td>第一章</td>
+          <td>\(\Phi = \alpha A \Delta T\)</td>
+          <td>牛顿冷却定律</td>
+        </tr>
+        <tr>
+          <td>第一章</td>
+          <td>\(\rho c \dfrac{\partial T}{\partial t} = \nabla \cdot (\lambda \nabla T) + \dot{q}_v\)</td>
+          <td>导热微分方程</td>
+        </tr>
+        <tr>
+          <td>第二章</td>
+          <td>\([K]\{T\} = \{F\}\)</td>
+          <td>稳态有限元方程</td>
+        </tr>
+        <tr>
+          <td>第三章</td>
+          <td>\(\big([C] + \theta\Delta t[K]\big)\{T\}_{n+1} = \big([C] - (1-\theta)\Delta t[K]\big)\{T\}_n + \Delta t[\cdots]\)</td>
+          <td>瞬态递推公式（θ 法）</td>
+        </tr>
+        <tr>
+          <td>第四章</td>
+          <td>\([K]\{u\} = \{F^{mech}\} + \{F^{th}\}\)</td>
+          <td>热弹性有限元方程</td>
+        </tr>
+        <tr>
+          <td>第四章</td>
+          <td>\(\{\mathrm{d}\sigma\} = [D]_{ep}\{\mathrm{d}\varepsilon\} - \{C\}_{ep}\mathrm{d}T\)</td>
+          <td>热弹塑性增量本构</td>
+        </tr>
+      </tbody>
+    </table>
+  </section>
+
+
+  <!-- ========== FAQ ========== -->
+  <section class="card" id="faq">
+    <h2>常见问题解答（FAQ）</h2>
+
+    <details open>
+      <summary>Q1：导热系数 λ 和热扩散率 a 有什么区别？</summary>
+      <p>导热系数 λ 表征材料的<strong>导热能力</strong>，即单位温度梯度下通过单位面积的热流量；
+        热扩散率 \(a = \lambda/(\rho c)\) 表征<strong>温度趋于均匀一致的能力</strong>，
+        它综合考虑了导热能力和储热能力。导热系数大的材料导热能力强，
+        但如果其热容也很大，则温度趋于均匀的速度不一定快。</p>
+    </details>
+
+    <details>
+      <summary>Q2：Galerkin 法与变分法有什么区别和联系？</summary>
+      <p>对于线性自伴随微分方程，Galerkin 法与变分法（Rayleigh-Ritz 法）等价，
+        都能得到对称的刚度矩阵。但 Galerkin 法的适用范围更广，
+        不要求微分方程一定是某泛函的 Euler 方程。在热传导问题中，
+        由于控制方程为线性自伴随的，两种方法结果一致。</p>
+    </details>
+
+    <details>
+      <summary>Q3：为什么第一类边界条件称为"强制边界条件"？</summary>
+      <p>第一类边界条件直接规定了边界上的温度值，在有限元中需要<strong>强制</strong>
+        对相应节点的自由度施加约束（即直接指定节点温度），因此称为强制边界条件。
+        而第二、三类边界条件通过边界积分项自然出现在载荷向量中，
+        不需要对节点自由度进行强制约束，故称为自然边界条件。</p>
+    </details>
+
+    <details>
+      <summary>Q4：瞬态分析中如何选择合适的时间步长？</summary>
+      <p>建议遵循以下原则：</p>
+      <ul>
+        <li>在温度急剧变化阶段（如焊接加热和初始冷却），取较小时间步长（如 0.01～0.1 s）；</li>
+        <li>在温度变化平缓阶段可适当增大时间步长；</li>
+        <li>对于显式方案，必须满足稳定条件 \(\Delta t \le \rho c(\Delta x)^2/(6\lambda)\)；</li>
+        <li>Crank-Nicolson 等隐式方案虽然无条件稳定，但时间步长过大会导致精度下降。</li>
+      </ul>
+    </details>
+
+    <details>
+      <summary>Q5：相变潜热在有限元中如何处理？</summary>
+      <p>常用方法有两种：<strong>等效比热法</strong>将相变潜热折算为相变温度区间内的等效比热增大；
+        <strong>焓法</strong>将温度与焓的关系直接纳入控制方程，适用于相变温度区间较宽的情况。
+        在铸造凝固模拟中，焓法应用更为广泛。</p>
+    </details>
+
+    <details>
+      <summary>Q6：热应力分析中为什么要区分热弹性和热弹塑性？</summary>
+      <p>当热应力低于材料屈服强度时，材料处于弹性状态，卸载后应力可以完全恢复，
+        此时热弹性分析即可满足精度要求。但当热应力超过屈服强度时
+        （这在焊接、淬火等剧烈热循环过程中非常常见），材料发生塑性变形，
+        卸载后存在残余应力和残余变形，必须采用热弹塑性模型才能准确预测残余应力分布。</p>
+    </details>
+  </section>
+
+
+  <!-- ========== 参考资料 ========== -->
+  <section class="card" id="refs">
+    <h2>推荐阅读与参考资料</h2>
+    <ol>
+      <li>Incropera, F. P., DeWitt, D. P., et al. <em>Fundamentals of Heat and Mass Transfer</em>.
+        Wiley.（传热学经典教材，涵盖三种传热方式的基本理论）</li>
+      <li>Dantzig, J. A., Tucker III, C. L. <em>Modeling in Materials Processing</em>.
+        Cambridge University Press, 2002.（材料加工建模的综合性教材）</li>
+      <li>Zienkiewicz, O. C., Taylor, R. L. <em>The Finite Element Method</em>.
+        （有限元方法经典著作，包含热传导问题的详细推导）</li>
+      <li>井玉安，宋仁伯. 《材料成型过程传热原理与设备》. 北京：冶金工业出版社.</li>
+      <li>曾敏. 《传热学要点与解题》. 西安：西北交通大学出版社，2006.</li>
+    </ol>
+  </section>
+
+  </main>
+</div>
+
+<footer>
+  © 材料加工过程数值模拟课程组　·　传热基础课件　·　本页面仅供教学使用
+</footer>
+
+<button id="toTop" title="返回顶部">↑</button>
+
+<script>
+/* ---------- 滚动高亮导航 ---------- */
+(function () {
+  const links = Array.from(document.querySelectorAll('.sidebar a'));
+  const sections = links
+    .map(a => document.querySelector(a.getAttribute('href')))
+    .filter(Boolean);
+
+  const setActive = (id) => {
+    links.forEach(l => l.classList.toggle('active', l.getAttribute('href') === '#' + id));
+  };
+
+  const obs = new IntersectionObserver((entries) => {
+    entries.forEach(e => { if (e.isIntersecting) setActive(e.target.id); });
+  }, { rootMargin: '-15% 0px -72% 0px', threshold: 0 });
+
+  sections.forEach(s => obs.observe(s));
+
+  /* 点击平滑滚动 */
+  links.forEach(l => {
+    l.addEventListener('click', (ev) => {
+      const target = document.querySelector(l.getAttribute('href'));
+      if (!target) return;
+      ev.preventDefault();
+      target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      setActive(target.id);
+    });
+  });
+})();
+
+/* ---------- 返回顶部 ---------- */
+(function () {
+  const btn = document.getElementById('toTop');
+  window.addEventListener('scroll', () => {
+    btn.classList.toggle('show', window.scrollY > 500);
+  });
+  btn.addEventListener('click', () => window.scrollTo({ top: 0, behavior: 'smooth' }));
+})();
+</script>
+
+</body>
+</html>
